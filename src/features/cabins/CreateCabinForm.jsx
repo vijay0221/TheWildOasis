@@ -8,58 +8,31 @@ import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createEditCabin } from "../../services/apiCabins";
-import toast from "react-hot-toast";
 import FormRow from "../../ui/FormRow";
+import {useCreateCabin} from './useCreateCabin'
+import {useEditCabin} from './useEditCabin'
+
 
 
 
   
-function CreateCabinForm({cabinToEdit={}}) {
+function CreateCabinForm({cabinToEdit={}}) {  
+  const {isCreating,createCabin}=useCreateCabin();
+  const {isEditing,editCabin}=useEditCabin();
+  const isWorking = isCreating || isEditing;
+
   const {id:editId,...editValues}=cabinToEdit;
   const isEditSession=Boolean(editId)
- const queryClient=useQueryClient()
- const {register,handleSubmit,reset,getValues,formState}= useForm({
-  defaultValues:isEditSession?editValues:{}
- });
- const {errors}=formState
-console.log(errors)
-  const {mutate:createCabin,isLoading:isCreating}=useMutation({
-    mutationFn:createEditCabin,
-    onSuccess:()=>{
-      toast.success("new Cabin successfully created")
-      queryClient.invalidateQueries({
-        queryKey:['cabins']
-      
-      })
-      reset();
-
-    },
-    onError:err=>toast.error(err.message)
-  })
-
-
-  const {mutate:editCabin,isLoading:isEditing}=useMutation({
-    mutationFn:({newCabinData,id})=>createEditCabin(newCabinData,id),
-    onSuccess:()=>{
-      toast.success("cabin successfully edited")
-      queryClient.invalidateQueries({
-        queryKey:['cabins']
-      
-      })
-      reset();
-
-    },
-    onError:err=>toast.error(err.message)
-  })
-
-
-  const isWorking = isCreating || isEditing;
+  const {register,handleSubmit,reset,getValues,formState}= useForm({
+    defaultValues:isEditSession?editValues:{}
+  });
+  const {errors}=formState
+  console.log(errors)
+  
   function onSubmit(data){  
       const image=typeof data.image==="string"?data.image:data.image[0]
-  if(isEditSession) editCabin({newCabinData:{...data,image},id:editId});
-  else createCabin({...data,image:image})
+  if(isEditSession) editCabin({newCabinData:{...data,image},id:editId},{onSuccess:(data)=>reset(),});
+  else createCabin({...data,image:image},{onSuccess:(data)=>reset(),})
   }
 
   function onError(errors){
@@ -117,7 +90,7 @@ console.log(errors)
       <FormRow label="Description for website" error={errors?.description?.message}>
         <Textarea type="number" id="description" defaultValue="" {...register('description',{
           required:"this field is required"
-        })} disabled={isWorking }/>
+        })} />
       </FormRow>
 
       <FormRow label="Cabin photo">
