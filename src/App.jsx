@@ -13,7 +13,6 @@ import PageNotFound from './pages/PageNotFound'
 import AppLayout from "./ui/AppLayout"
 import { Toaster } from "react-hot-toast"
 
-
 const queryClient=new QueryClient({
   defaultOptions:{
     queries:{
@@ -66,7 +65,6 @@ function App() {
             }
              />
     </QueryClientProvider>
-    
   )
 }
 

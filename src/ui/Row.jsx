@@ -15,6 +15,7 @@ ${
   (props)=>props.type==="vertical" && css`
    flex-direction: column;
    gap: 1.6rem;
+
   `
 }
 `;
